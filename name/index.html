@@ -1,0 +1,165 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>生成文件名</title>
+  <!-- 引入 Bootstrap -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css">
+  <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>
+
+  <style>
+    /* 自定义样式 */
+    .form-group.row.mb-0 label {
+      padding-top: 0.375rem;
+      padding-bottom: 0.375rem;
+      margin-bottom: 0;
+      text-align: right;
+    }
+
+    .form-group.row.mb-0 .col-sm-9 {
+      padding-top: 0.375rem;
+      padding-bottom: 0.375rem;
+    }
+
+    .mb-compact {
+      margin-bottom: 0.25rem !important;
+    }
+  </style>
+</head>
+<body>
+  <div class="container my-5">
+    <h1 class="text-center mb-4">生成文件名</h1>
+
+    <form id="generateFileNameForm">
+      <div class="form-group row">
+        <label for="chinese-name" class="col-sm-3 col-form-label">中文名：</label>
+        <div class="col-sm-9">
+          <input type="text" id="chinese-name" name="chineseName" class="form-control" required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="tv-station" class="col-sm-3 col-form-label">电视台：</label>
+        <div class="col-sm-9">
+          <select class="form-control" id="tv-station" name="tvStation" required>
+            <option value="">请选择电视台</option>
+            <option value="Jade">Jade</option>
+            <option value="J2">J2</option>
+            <option value="ViuTV">ViuTV</option>
+            <option value="ViuSix">ViuSix</option>
+            <option value="HOYTV">HOYTV</option>
+            <option value="RTHK31">RTHK31</option>
+            <option value="CCTV1">CCTV1</option>
+            <option value="CCTV6">CCTV6</option>
+            <option value="CCTV9">CCTV9</option>
+            <option value="CCTV10">CCTV10</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="english-name" class="col-sm-3 col-form-label">英文名：</label>
+        <div class="col-sm-9">
+          <input type="text" id="english-name" name="englishName" class="form-control" required>
+        </div>
+      </div>
+      <div class="form-group row row">
+        <label for="year" class="col-sm-3 col-form-label">年份：</label>
+        <div class="col-sm-9">
+          <input type="number" id="year" name="year" class="form-control" min="1900" max="2099" required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="episode-number" class="col-sm-3 col-form-label">集数：</label>
+        <div class="col-sm-9">
+          <input type="text" id="episode-number" name="episodeNumber" class="form-control" required>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="medium" class="col-sm-3 col-form-label">媒介：</label>
+        <div class="col-sm-9">
+          <input type="text" id="medium" name="medium" class="form-control" value="HDTV" readonly>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="resolution" class="col-sm-3 col-form-label">分辨率：</label>
+        <div class="col-sm-9">
+          <input type="text" id="resolution" name="resolution" class="form-control" value="1080i" readonly>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="video-codec" class="col-sm-3 col-form-label">视频编码：</label>
+        <div class="col-sm-9">
+          <input type="text" id="video-codec" name="videoCodec" class="form-control" value="H264" readonly>
+        </div>
+      </div>
+      <div class="form-group row">
+        <label for="audio-codec" class="col-sm-3 col-form-label">音频编码：</label>
+        <div class="col-sm-9">
+          <input type="text" id="audio-codec" name="audioCodec" class="form-control" required readonly>
+        </div>
+      </div>
+      <div class="form-group row">
+        <div class="col-sm-9 offset-sm-3">
+          <button type="button" id="generateFileNameBtn" class="btn btn-primary">生成文件名</button>
+        </div>
+      </div>
+    </form>
+    <div id="fileNameResultDiv"></div>
+  </div>
+
+  <script>
+    $(document).ready(function() {
+      // 获取音频编码和电视台选项框
+      const audioCodecInput = $("#audio-codec");
+      const tvStationSelect = $("#tv-station");
+
+      // 添加选项框change事件监听器
+      tvStationSelect.change(function() {
+        // 获取当前选中的电视台
+        const selectedTvStation = tvStationSelect.val();
+
+        // 检查当前选中的电视台是否适用于AC3编码
+        const ac3TvStations = ["Jade", "J2", "ViuTV", "ViuSix", "HOYTV", "RTHK31"];
+        const isAc3 = ac3TvStations.includes(selectedTvStation);
+
+        // 根据是否适用于AC3编码来设置音频编码输入框的值
+        audioCodecInput.val(isAc3 ? "AC3" : "MPEG");
+      });
+
+      // 添加点击按钮事件监听器
+      $("#generateFileNameBtn").click(function() {
+        // 获取表单数据
+        const formData = $("#generateFileNameForm").serializeArray();
+
+        // 将表单数据转换为对象格式
+        const dataObj = {};
+        for (let i = 0; i < formData.length; i++) {
+          dataObj[formData[i].name] = formData[i].value;
+        }
+
+        // 生成文件名
+        const fileName = generateFileName(dataObj);
+
+        // 显示文件名结果
+        $("#fileNameResultDiv").html(`<div class="alert alert-success mt-4">文件名：${fileName}</div>`);
+      });
+    });
+
+    // 生成文件名函数
+    function generateFileName(data) {
+      const chineseName = data.chineseName;
+      const tvStation = data.tvStation;
+      const englishName = data.englishName;
+      const year = data.year;
+      const episodeNumber = 'Ep' + data.episodeNumber;
+      const medium = data.medium;
+      const resolution = data.resolution;
+      const videoCodec = data.videoCodec;
+      const audioCodec = data.audioCodec;
+
+      return `[${chineseName}].${tvStation}.${englishName}.${year}.${episodeNumber}.${medium}.${resolution}.${videoCodec}.${audioCodec}-CMCTV`;
+    }
+  </script>
+</body>
+</html>
